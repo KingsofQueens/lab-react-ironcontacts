@@ -1,57 +1,89 @@
 import "./App.css";
-import contactData from "./contacts.json";
+import contactList from "./contacts.json";
 import { useState } from "react";
 
 function App() {
-  const [contacts, setContacts] = useState([
-    contactData[0],
-    contactData[1],
-    contactData[2],
-    contactData[3],
-    contactData[4],
-  ]);
+  const [contacts, setContacts] = useState(contactList.slice(0, 5));
 
-  console.log(contactData);
+  console.log(contactList);
 
   const handleAddRandomContact = () => {
-    setContacts([
-      ...contacts,
-      contactData[Math.random(Math.random() * contactData.length) + 6],
-    ]);
+    const remainingContacts = contactList.filter((contact) => {
+      return !contacts.includes(contact);
+    });
+    if (remainingContacts.length) {
+      const randomContact =
+        remainingContacts[Math.floor(Math.random() * remainingContacts.length)];
+      setContacts([...contacts, randomContact]);
+    }
+  };
+
+  const handleSortByName = () => {
+    const sortedContacts = [...contacts];
+    sortedContacts.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+    setContacts(sortedContacts);
+  };
+
+  const handleSortByPopularity = () => {
+    const sortedPopularity = [...contacts];
+    sortedPopularity.sort((a, b) => {
+      return a.popularity - b.popularity;
+    });
+    setContacts(sortedPopularity);
+  };
+
+  const handleDeleteContact = (id) => {
+    const contactsExcludingDeletedContact = contacts.filter((contact) => {
+      return contact.id !== id;
+    });
+    setContacts(contactsExcludingDeletedContact);
   };
 
   return (
     <div className="App">
       <h3>IronContacts</h3>
-      <button onClick={handleAddRandomContact}>Add Random Contact</button>
+      <p>
+        <br />
+        <button onClick={handleAddRandomContact}>Add Random Contact</button>
+        <button onClick={handleSortByName}>Sort by name</button>
+        <button onClick={handleSortByPopularity}>Sort by popularity</button>
+      </p>
       <table>
         <thead>
           <tr>
-            <td>Picture</td>
-            <td>Name</td>
-            <td>Popularity</td>
-            <td>Won an Oscar</td>
-            <td>Won an Emmy</td>
+            <th>Picture</th>
+            <th>Name</th>
+            <th>Popularity</th>
+            <th>Won an Oscar</th>
+            <th>Won an Emmy</th>
+            <th>Action</th>
           </tr>
         </thead>
 
-        {contacts.map((value) => {
+        {contacts.map((contact) => {
           return (
             <>
-              <tbody key={value}>
-                <tr>
-                  <td key={value.pictureUrl}>
-                    <img src={value.pictureUrl} alt={value.name} />
-                  </td>
-                  <td key={value.name}>{value.name}</td>
-                  <td key={value.popularity}>{value.popularity}</td>
+              <tbody>
+                <tr key={contact.id}>
                   <td>
-                    {(value.wonOscar && <p>🏆</p>) ||
-                      (!value.wonOscar && <p></p>)}
+                    <img src={contact.pictureUrl} alt={contact.name} />
+                  </td>
+                  <td>{contact.name}</td>
+                  <td>{contact.popularity.toFixed(2)}</td>
+                  <td>
+                    {(contact.wonOscar && <p>🏆</p>) ||
+                      (!contact.wonOscar && <p></p>)}
                   </td>
                   <td>
-                    {(value.wonEmmy && <p>🏆</p>) ||
-                      (!value.wonEmmy && <p></p>)}
+                    {(contact.wonEmmy && <p>🏆</p>) ||
+                      (!contact.wonEmmy && <p></p>)}
+                  </td>
+                  <td>
+                    <button onClick={() => handleDeleteContact(contact.id)}>
+                      Delete
+                    </button>
                   </td>
                 </tr>
               </tbody>
